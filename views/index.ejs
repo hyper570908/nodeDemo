@@ -1,0 +1,46 @@
+﻿<%- include extend/header %>
+	<table id="table1"  class="display" cellspacing="0" width="100%">
+		<thead>
+			<tr style="color:#428bca">
+			<th>Item</th>
+			<th>MAC</th>
+			<!--<th>Name</th>-->
+			<th>Last Repor</th>
+			<th>UL Rss</th>
+			<th>UL SNR</th>
+			<th>Status</th>
+			</tr>
+		</thead>
+<% if(finalList != null ){ %>
+
+	<% var keys = Object.keys(finalList); %>
+	<% if(finalList != null && keys.length>0){ %>
+		<tbody>
+			<% for(var i=0;i<keys.length ;i++){ %>
+				<tr>
+					<td><%= i+1%></td>
+					<td><%= finalList[keys[i]].mac%></td>
+					<!--<td><%= finalList[keys[i]].name%></td>-->
+					<td><%= finalList[keys[i]].date%></td>
+					<td><%= finalList[keys[i]].extra.rssi%></td>
+					<td><%= finalList[keys[i]].extra.snr%></td>
+					<td>
+					<% if(finalList[keys[i]].overtime){ %>
+						<img src="/icons/connection_fail.png" width="ˇ30" height="30" name="status">
+					<% }else{ %>
+						<img src="/icons/connection_ok.png" width="30" height="30" name="status">
+					<% } %>
+
+					</td>
+				</tr>
+			<% } %>
+
+		</tbody>
+
+
+	<% } %>
+
+<% } %>
+	</table>
+	<input type="hidden" id="type" name="type" value="<%= type%>">
+<%- include extend/footer %>

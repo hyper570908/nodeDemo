@@ -1,0 +1,77 @@
+<%- include extend/header_device.ejs %>
+
+	<table id="table1"  class="display" cellspacing="0" width="100%">
+		<thead>
+            <tr style="color:#428bca">
+	            <th>Item</th>
+	            <th>Receive time</th>
+	            <th>Data</th>
+	            <th>Temperature</th>
+	            <th>Humidity</th>
+				<th>BATL</th>
+				<th>PH</th>
+	            <th>EC</th>
+            </tr>
+        </thead>
+        <% if(devices != null && devices.length >0){ %>
+
+		<tbody>
+
+			<% for(var i=0;i<length ;i++){ %>
+				<tr>
+					<td><%= i+1%></td>
+					<td><%= devices[i].date%></td>
+					<td><%= devices[i].data%></td>
+		            <th><%= devices[i].info.temperature%></th>
+		            <th><%= devices[i].info.humidity%></th>
+					<th><%= devices[i].info.voltage%></th>
+					<th></th>
+		            <th></th>
+	            </tr>
+	        <% } %>
+		</tbody>
+
+	<% } %>
+	</table>
+	<input type="hidden" id="mac" name="mac" value="<%= mac%>">
+	<input type="hidden" id="type" name="type" value="<%= type%>">
+	<input type="hidden" id="date" name="date" value="<%= date%>">
+	<input type="hidden" id="option" name="option" value="<%= option%>">
+
+	<HR size="10">
+	<div id="chart1" class="col-md-6" style="margin-top: -10px;">
+
+        <h2>&nbsp;</h2>
+    </div>
+    <div  class="col-md-6" >
+
+        <input type ="button" onclick="javascript:location.href='#wrapper'" value="Table"></input>
+    </div>
+    <br>
+
+	<div id="PH" style="padding:10px">
+      <div id="chartPH"></div>
+      </div> <!-- PH-tabs -->
+      <div id="imgChart1"></div>
+
+      <div id="DO" style="padding:10px">
+        <div id="chartDO"></div>
+      </div> <!-- DO-tabs -->
+
+      <div id="COND" style="padding:10px">
+        <div id="chartCOND"></div>
+      </div> <!-- COND-tabs -->
+
+      <div id="Temperature" style="padding:10px">
+        <div id="chartTmp"></div>
+      </div> <!-- Temperature-tabs -->
+
+      <div id="NTU" style="padding:10px">
+        <div id="chartNTU" ></div>
+      </div> <!-- NTU-tabs -->
+
+      <div id="Voltage" style="padding:10px">
+        <div id="chartVol"></div>
+      </div> <!-- Voltage-tabs -->
+    </div>
+<%- include extend/footer %>
