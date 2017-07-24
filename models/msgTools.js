@@ -73,8 +73,8 @@ exports.parseMsg = function (msg) {
     mData = obj.data;
     mType = mData.substring(0,4);
     mMac  = obj.macAddr;
-    
-   
+
+
     if(obj.recv){
         mRecv = obj.recv;
     }else
@@ -82,12 +82,10 @@ exports.parseMsg = function (msg) {
         mRecv = obj.time;
     }
     //Parse data
-    /*if(isSameTagCheck(mType,mMac,mRecv))
-            return null;*/
+    if(mType.indexOf('aa')==-1 || isSameTagCheck(mType,mMac,mRecv))
+            return null;
     if(mType.indexOf('aa')!=-1){
          mInfo = parseDefineMessage(mData,mType);
-    }else{
-        return null;
     }
 
     mDate = moment(mRecv).format('YYYY/MM/DD HH:mm:ss');
@@ -104,17 +102,16 @@ exports.parseMsg = function (msg) {
          delete obj.snr_min;
          delete obj.systype;
          mExtra = obj;
-    } 
+    }
 
     var msg = {mac:mMac,data:mData,recv:mRecv,date:mDate,extra:mExtra,timestamp:mTimestamp};
-    
-    finalList[mMac]=msg;
-    JsonFileTools.saveJsonToFile(path,finalList);
-    
+
     if(mInfo){
         console.log('**** '+msg.date +' mac:'+msg.mac+' => data:'+msg.data+'\ninfo:'+JSON.stringify(mInfo));
         msg.information=mInfo;
     }
+    finalList[mMac]=msg;
+    JsonFileTools.saveJsonToFile(path,finalList);
 
     return msg;
 }
@@ -166,7 +163,7 @@ exports.getDevicesData = function (type,devices) {
             //if(i==53){
               //console.log( '#### '+devices[i].mac + ': ' + JSON.stringify(devices[i]) );
             //}
-            array.push(getDevicesArray(devices[i],i,type));
+            array.push(getDevicesArray(devices[i],i+1,type));
         }
     }
 

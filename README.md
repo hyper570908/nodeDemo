@@ -36,11 +36,17 @@ Port   : 1883
 
 ## Getting Started
 
-1. cd nodeDemo-master
-2. npm install
-3. index <http://localhost:3000>
-4. node-red <http://localhost:3000/red>
+* cd nodeDemo-master
 
+* Install Dependencies
+  npm install
+
+* Start server
+  node app.js
+
+* Open web page
+  index <http://localhost:3000>
+  node-red <http://localhost:3000/red>
 
 ## Copyright and license
 

@@ -38,8 +38,8 @@ function findUnitsAndShowSetting(req,res,isUpdate){
 module.exports = function(app) {
   app.get('/', function (req, res) {
   	    var now = new Date().getTime();
-		finalList = JsonFileTools.getJsonFromFile(path);
-	
+		var finalList = JsonFileTools.getJsonFromFile(path);
+
 		//var unitObj = JsonFileTools.getJsonFromFile(unitPath);
 
 		//console.log('finalList :'+JSON.stringify(finalList));
@@ -78,32 +78,24 @@ module.exports = function(app) {
 	var type = req.query.type;
 	var date = req.query.date;
 	var option = req.query.option;
+	var finalList = JsonFileTools.getJsonFromFile(path);
+	var info = finalList[mac].information;
+	var infoKeys = Object.keys(info);
+	var mArray = [];
+	for(var key in infoKeys){
+		mArray.push(infoKeys[key].toUpperCase());
+	}
+	var newArray = mArray.concat(settings.extend);
+
 	req.session.type = type;
-	DeviceDbTools.findDevicesByDate(date,mac,Number(0),'desc',function(err,devices){
-		if(err){
-			console.log('find name:'+find_mac);
-			return;
-		}
-		var length = 15;
-		if(devices.length<length){
-			length = devices.length;
-		}
-
-		/*devices.forEach(function(device) {
-			console.log('mac:'+device.date + ', data :' +device.data);
-		});*/
-
-		res.render('devices', { title: 'Device',
-			devices: devices,
-			success: req.flash('success').toString(),
-			error: req.flash('error').toString(),
-			type:req.session.type,
-			mac:mac,
-			date:date,
-			option:option,
-			length:length,
-			co:settings.co
-		});
+	res.render('devices', { title: 'Device',
+		success: req.flash('success').toString(),
+		error: req.flash('error').toString(),
+		type:req.session.type,
+		mac:mac,
+		date:date,
+		option:option,
+		headers:newArray
 	});
   });
 
@@ -152,7 +144,7 @@ module.exports = function(app) {
 			if(unitObj[post_mac]){
 				delete unitObj[post_mac];
 			}
-			
+
 			JsonFileTools.saveJsonToFile(unitPath,unitObj);
 
 		}else{//Edit mode
