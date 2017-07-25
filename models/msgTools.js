@@ -11,7 +11,7 @@ var hour = 60*60*1000;
 var isNeedGWMac = settings.isNeedGWMac;//For blazing
 //Save data to file path
 var path = './public/data/finalList.json';
-var path2 = './public/data/gwMap.json';
+var extendPath = './public/data/extend.json';
 //Save data
 var finalList = {};
 var macGwIdMapList;//For gateway map (key:mac value:id array)
@@ -23,32 +23,13 @@ var type_time_map = {};
 var selectType,selectMac;
 
 function init(){
-    finalList = JsonFileTools.getJsonFromFile(path);
-    /*listDbTools.findByName('finalist',function(err,lists){
-        if(err)
-            return;
-        finalList = lists[0].list;
-    });*/
-}
-
-function initMap(){
-    macGwIdMapList = JsonFileTools.getJsonFromFile(path2);
-    gwIdMacMapList = getMapList(macGwIdMapList);
-}
-
-/*
-This function is GW map betwween id and mac transformer
-Source is GW maap (key:mac, value:id array)
-Transform to different map (key:id, value:)
- */
-function getMapList(list){
-    var keys = Object.keys(list);
-    var json = {};
-    for(key in list){
-       json[list[key][0]]=key ;
-       json[list[key][1]]=key ;
+    try {
+        var finalList = JsonFileTools.getJsonFromFile(path);
     }
-    return json;
+    catch (e) {
+        console.log('???? finalList.json file is wrong :'+e.toString());
+        finalList = null;
+    }
 }
 
 init();
@@ -139,23 +120,11 @@ exports.saveMacGwIdMapToFile = function () {
     JsonFileTools.saveJsonToFile(path2,finalList);
 }
 
-exports.getGwIdByMac = function (mac) {
-    selectMac = mac;
-    if(macGwIdMapList === undefined){
-        initMap();
-    }
-    return macGwIdMapList[mac];
-}
+
 
 
 exports.getDevicesData = function (type,devices) {
     var array = [];
-    if(isNeedGWMac){
-        //For blazing
-        if(gwIdMacMapList === undefined || gwIdMacMapList === null){
-            initMap();
-        }
-    }
 
     if(devices){
         for (var i=0;i<devices.length;i++)
@@ -186,8 +155,17 @@ function getDevicesArray(obj,item,type){
         console.log('obj.info('+infokey+'):'+obj.info[infokey]);
         arr.push(obj.info[infokey]);
     });
-    arr.push('');
-    arr.push('');
+    try {
+		var extendArray = JsonFileTools.getJsonFromFile(extendPath);
+	}
+	catch (e) {
+		console.log('???? extend.json file is wrong :'+e.toString());
+		extendArray = null;
+	}
+    //Jason add for extend item without value
+    for(var key in extendArray){
+         arr.push('');
+    }
 
     return arr;
 }

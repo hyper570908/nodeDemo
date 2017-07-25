@@ -6,8 +6,8 @@ var UnitDbTools = require('../models/unitDbTools.js');
 var settings = require('../settings');
 var JsonFileTools =  require('../models/jsonFileTools.js');
 var path = './public/data/finalList.json';
-var path2 = './public/data/test.json';
 var unitPath = './public/data/unit.json';
+var extendPath = './public/data/extend.json';
 var hour = 60*60*1000;
 var type = 'gps';
 
@@ -38,7 +38,13 @@ function findUnitsAndShowSetting(req,res,isUpdate){
 module.exports = function(app) {
   app.get('/', function (req, res) {
   	    var now = new Date().getTime();
-		var finalList = JsonFileTools.getJsonFromFile(path);
+		try {
+			var finalList = JsonFileTools.getJsonFromFile(path);
+		}
+		catch (e) {
+			console.log('???? finalList.json file is wrong :'+e.toString());
+			finalList = null;
+		}
 
 		//var unitObj = JsonFileTools.getJsonFromFile(unitPath);
 
@@ -78,15 +84,33 @@ module.exports = function(app) {
 	var type = req.query.type;
 	var date = req.query.date;
 	var option = req.query.option;
-	var finalList = JsonFileTools.getJsonFromFile(path);
+	try {
+		var finalList = JsonFileTools.getJsonFromFile(path);
+	}
+	catch (e) {
+		console.log('???? finalList.json file is wrong :'+e.toString());
+		finalList = null;
+	}
+	try {
+		var extendArray = JsonFileTools.getJsonFromFile(extendPath);
+	}
+	catch (e) {
+		console.log('???? extend.json file is wrong :'+e.toString());
+		extendArray = null;
+	}
+	
 	var info = finalList[mac].information;
 	var infoKeys = Object.keys(info);
 	var mArray = [];
 	for(var key in infoKeys){
 		mArray.push(infoKeys[key].toUpperCase());
 	}
-	var newArray = mArray.concat(settings.extend);
-
+	if(extendArray){
+		var newArray = mArray.concat(extendArray);
+	}else{
+		var newArray = mArray;
+	}
+	
 	req.session.type = type;
 	res.render('devices', { title: 'Device',
 		success: req.flash('success').toString(),
