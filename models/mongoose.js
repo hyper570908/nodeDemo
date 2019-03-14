@@ -1,6 +1,4 @@
 var mongoose = require('mongoose');
-var settings = require('../settings');
 mongoose.Promise = global.Promise;
-var dbPath = settings.dbpath;
-mongoose.connect(dbPath);
+mongoose.connect('mongodb://localhost/test');
 module.exports = mongoose;

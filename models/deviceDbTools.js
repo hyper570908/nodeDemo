@@ -7,19 +7,18 @@ var moment = require('moment');
 exports.saveDeviceMsg = function (obj,callback) {
 
     var now = moment().toDate();
-    //console.log(now + ' Debug : saveDeviceMsg obj:'+JSON.stringify(obj));
+    console.log(now + ' Debug : saveDeviceMsg');
 
     var newDevice = new DeviceModel({
-        macAddr     : obj.mac,
-        data        : obj.data,
-        recv        : obj.recv,
-        date        : obj.date,
-        timestamp   : obj.timestamp,
-        extra       : obj.extra,
-        info        : obj.information
+        macAddr    : obj.macAddr,
+        data       : obj.data,
+        recv       : obj.recv,
+        date       : obj.date,
+        timestamp  : obj.timestamp,
+        information: obj.information
     });
 
-    //console.log('$$$$ DeviceModel : '+JSON.stringify(newDevice));
+    console.log('$$$$ DeviceModel : '+JSON.stringify(newDevice));
 
     newDevice.save(function(err){
         if(err){
@@ -135,71 +134,71 @@ exports.findLastDevice = function (json,calllback) {
 *date option: 0:one days 1:one weeks 2:one months 3:three months
 */
 exports.findDevicesByDate = function (dateStr,mac,dateOption,order,calllback) {
-    
-    var json = {macAddr:mac};
-    return toFindDevice(dateStr,json,dateOption,order,calllback);
-   
-};
-
-exports.findDevicesByGWID = function (dateStr,gwid,dateOption,order,calllback) {
-    
-    var json = {"extra.gwid":gwid};
-    return toFindDevice(dateStr,json,dateOption,order,calllback);
-   
-};
-
-function toFindDevice(dateStr,json,dateOption,order,calllback) {
     console.log(moment().format('YYYY-MM-DD HH:mm:ss')+' Debug : findDevicesByDate()');
-    console.log(JSON.stringify(json));
-    testDate = moment(dateStr,'YYYY/MM/DD').add(1,'days').toDate();
-    var toMoment = moment(testDate);
-    var to = toMoment.toDate();
+    console.log('-mac : '+mac);
+    var nowMoment = moment(dateStr, "YYYY-MM-DD hh:mmss");
+    var now = nowMoment.toDate();
 
     var from;
     switch(dateOption) {
     case 0:
-        from =  toMoment.subtract(1,'days').toDate();
+        from =  nowMoment.subtract(1,'days').toDate();
         break;
     case 1:
-        from =  toMoment.subtract(1,'weeks').toDate();
+        from =  nowMoment.subtract(1,'weeks').toDate();
         break;
     case 2:
-        from =  toMoment.subtract(1,'months').toDate();
+        from =  nowMoment.subtract(1,'months').toDate();
         break;
     case 3:
-        from =  toMoment.subtract(3,'months').toDate();
+        from =  nowMoment.subtract(3,'months').toDate();
         break;
     default:
-        from =  toMoment.subtract(3,'days').toDate();
+        from =  nowMoment.subtract(3,'months').toDate();
     }
-    console.log( 'to :'+to );
+    console.log( 'now :'+now );
     console.log( 'from :'+from );
-    
-    json.recv = {$gte:from, $lt:to};
 
-    var recvOrder = -1;
-    if(order === 'asc'){
-        recvOrder = 1;
-    }
+    var json = {macAddr:mac,
+                recv:{
+                    $gte:from,
+                    $lt:now
+                }
+        }
 
-    DeviceModel.find(json).sort({ recv:recvOrder}).exec(function(err, Devices){
-       
 
+    DeviceModel.find(json,(err, Devices) => {
         if (err) {
             console.log('Debug : findDevice err:', err);
             return calllback(err);
+        } else {
+            console.log('Debug :findDevice success\n:',Devices.length);
+            console.log('Before sort : first device \n:',JSON.stringify(Devices[0]));
+            console.log('Before sort : last device \n:',JSON.stringify(Devices[Devices.length-1]));
+            var devices = [];
+            if(order == 'asc' && Devices.length>0){
+               devices = Devices.sort(dynamicSort('-date'));
+            } else {
+               devices = Devices.sort(dynamicSort('date'));
+            }
+            console.log('After sort : first device \n:',JSON.stringify(devices[0]));
+            console.log('After sort : last device \n:',JSON.stringify(devices[Devices.length-1]));
+            return calllback(err,Devices);
         }
-        if(Devices && Devices.length>0){
-            console.log('Debug :Devices count:',Devices.length);
-            console.log('Debug :first\n:',Devices[0]['date']);
-            console.log('Debug :first\n:',Devices[Devices.length-1]['date']);
-        }else{
-            console.log('Debug :Devices count: 0');
-        }
-        return calllback(err,Devices);
     });
-   
 };
+
+function dynamicSort(property) {
+    var sortOrder = 1;
+    if(property[0] === "-") {
+        sortOrder = -1;
+        property = property.substr(1);
+    }
+    return function (a,b) {
+        var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+        return result * sortOrder;
+    }
+}
 
 exports.getOptioDeviceList = function (devices,option) {
     var diff = 1;

@@ -1,191 +1,128 @@
 ﻿var express = require('express');
 var router = express.Router();
-var DeviceDbTools = require('../models/deviceDbTools.js');
-var ListDbTools = require('../models/listDbTools.js');
-var UnitDbTools = require('../models/unitDbTools.js');
+var Device = require('../models/device.js');
 var settings = require('../settings');
 var JsonFileTools =  require('../models/jsonFileTools.js');
 var path = './public/data/finalList.json';
-var unitPath = './public/data/unit.json';
-var extendPath = './public/data/extend.json';
+var path2 = './public/data/checkMap.json';
 var hour = 60*60*1000;
-var type = 'gps';
+var test = true;
 
-function findUnitsAndShowSetting(req,res,isUpdate){
-	UnitDbTools.findAllUnits(function(err,units){
-		var successMessae,errorMessae;
-		var macTypeMap = {};
-
-		if(err){
-			errorMessae = err;
-		}else{
-			if(+units.length>0){
-				successMessae = '查詢到'+units.length+'筆資料';
-			}
-		}
-		req.session.units = units;
-
-		console.log( "successMessae:"+successMessae );
-		res.render('setting', { title: 'Setting',
-			units:req.session.units,
-			user:req.session.user,
-			success: successMessae,
-			error: errorMessae
-		});
-	});
-}
 
 module.exports = function(app) {
   app.get('/', function (req, res) {
-  	    var now = new Date().getTime();
-		try {
-			var finalList = JsonFileTools.getJsonFromFile(path);
-		}
-		catch (e) {
-			console.log('???? finalList.json file is wrong :'+e.toString());
+		var now = new Date().getTime();
+		var device = null,
 			finalList = null;
+		try{
+	        finalList = JsonFileTools.getJsonFromFile(path);
+	    } catch(e) {
+	        console.log('Get finalList error : ' + e);
+	        finalList = {};
+	        JsonFileTools.saveJsonToFile(path, finalList);
+	    }
+	    if (finalList === null) {
+	        finalList = {};
+	    }
+
+		var keys = Object.keys(finalList);
+		if (keys.length > 0) {
+			device = finalList[keys[0]];
 		}
+		res.render('index', {
+			title: '首頁',
+			device: device,
+			finalList: finalList
+		});
+  });
 
-		//var unitObj = JsonFileTools.getJsonFromFile(unitPath);
+  app.get('/setting', function (req, res) {
+		res.render('setting', {
+			title: '設定'
+		});
+  });
 
-		//console.log('finalList :'+JSON.stringify(finalList));
-		if(finalList){
-			var keys = Object.keys(finalList);
-			console.log('Index finalList :'+keys.length);
-			for(var i=0;i<keys.length ;i++){
-				//console.log( i + ') mac : ' + keys[i] +'=>' + JSON.stringify(finalList[keys[i]]));
-				//console.log(i+' result : '+ ((now - finalList[keys[i]].timestamp)/hour));
-				finalList[keys[i]].overtime = true;
-				if( ((now - finalList[keys[i]].timestamp)/hour) < 24 )  {
-					finalList[keys[i]].overtime = false;
-				}
-				//finalList[keys[i]].name = '';
-				//console.log(i+' keys[i] : '+ keys[i]);
-				//console.log(i+' unitObj[keys[i]] : '+ unitObj[keys[i]]);
-				/*if( unitObj[keys[i]] )  {
-					finalList[keys[i]].name = unitObj[keys[i]];
-				}*/
+  app.get('/test', function (req, res) {
+	res.render('test', {
+		title: '設定'
+	});
+});
+
+  // Jason add on 2017.11.16
+  app.get('/finalList', function (req, res) {
+		var devices = {},
+		    selectedType = null,
+			finalList = null;
+		try{
+	        finalList = JsonFileTools.getJsonFromFile(path);
+	    } catch(e) {
+	        console.log('Get finalList error : ' + e);
+	        finalList = {};
+	        JsonFileTools.saveJsonToFile(path, finalList);
+	    }
+	    if (finalList === null) {
+	        finalList = {};
+		}
+		var checkMap = JsonFileTools.getJsonFromFile(path2);
+		var maps = Object.values(checkMap);
+
+		var keys2 = Object.keys(finalList);
+		for(let i=0;i < keys2.length; i++) {
+			let mac = keys2[i];
+			
+			let obj = finalList[mac];
+			let type = obj.type;
+			if(i==0){
+				selectedType = type;
 			}
-		}else{
-			finalList = null;
+			if(devices[type] === undefined) {
+				devices[type] = [];
+			}
+			devices[type].push(obj);
 		}
 
-		res.render('index', { title: 'Index',
-			success: null,
-			error: null,
-			finalList:finalList,
-			type:type,
-			co:settings.co
+		res.render('finalList', {
+			title: '最新資訊',
+			finalList: devices[selectedType],
+			devices: devices,
+			maps: maps
 		});
   });
 
   app.get('/devices', function (req, res) {
-	var mac = req.query.mac;
-	var type = req.query.type;
-	var date = req.query.date;
-	var option = req.query.option;
-	try {
-		var finalList = JsonFileTools.getJsonFromFile(path);
-	}
-	catch (e) {
-		console.log('???? finalList.json file is wrong :'+e.toString());
-		finalList = null;
-	}
-	try {
-		var extendArray = JsonFileTools.getJsonFromFile(extendPath);
-	}
-	catch (e) {
-		console.log('???? extend.json file is wrong :'+e.toString());
-		extendArray = null;
-	}
-	
-	var info = finalList[mac].information;
-	var infoKeys = Object.keys(info);
-	var mArray = [];
-	for(var key in infoKeys){
-		mArray.push(infoKeys[key].toUpperCase());
-	}
-	if(extendArray){
-		var newArray = mArray.concat(extendArray);
-	}else{
-		var newArray = mArray;
-	}
-	
-	req.session.type = type;
-	res.render('devices', { title: 'Device',
-		success: req.flash('success').toString(),
-		error: req.flash('error').toString(),
-		type:req.session.type,
-		mac:mac,
-		date:date,
-		option:option,
-		headers:newArray
-	});
-  });
-
-  app.get('/setting', function (req, res) {
-		console.log('render to setting.ejs');
-		findUnitsAndShowSetting(req,res,true);
-  });
-
-  app.post('/setting', function (req, res) {
-		var	post_mac = req.body.mac;
-		var post_name = req.body.name;
-		var post_type = req.body.type_option;
-		var post_mode = req.body.mode;
-		var typeString = req.body.typeString;
-		console.log('mode : '+post_mode);
-		if(post_mode == 'new'){
-			if(	post_mac && post_name && post_mac.length==8 && post_name.length>=1){
-				console.log('post_mac:'+post_mac);
-				console.log('post_name:'+post_name);
-				UnitDbTools.saveUnit(post_mac,post_name,post_type,typeString,function(err,result){
-					if(err){
-						req.flash('error', err);
-						return res.redirect('/setting');
-					}
-					findUnitsAndShowSetting(req,res,true);
-				});
-				var unitObj = JsonFileTools.getJsonFromFile(unitPath);
-				unitObj[post_mac] = post_name;
-				JsonFileTools.saveJsonToFile(unitPath,unitObj);
-				return res.redirect('/setting');
-			}
-		}else if(post_mode == 'del'){//Delete mode
-			post_mac = req.body.postMac;
-			UnitDbTools.removeUnitByMac(post_mac,function(err,result){
-				if(err){
-					req.flash('error', err);
-					console.log('removeUnitByMac :'+post_mac + err);
-					return res.redirect('/setting');
-				}else{
-					req.flash('error', err);
-					console.log('removeUnitByMac :'+post_mac + 'success');
-				}
-				findUnitsAndShowSetting(req,res,false);
-			});
-			var unitObj = JsonFileTools.getJsonFromFile(unitPath);
-			if(unitObj[post_mac]){
-				delete unitObj[post_mac];
-			}
-
-			JsonFileTools.saveJsonToFile(unitPath,unitObj);
-
-		}else{//Edit mode
-			post_mac = req.body.postMac;
-			UnitDbTools.updateUnit(post_type,post_mac,post_name,null,typeString,function(err,result){
-				if(err){
-					req.flash('error', err);
-					console.log('edit  :'+post_mac + err);
-					return res.redirect('/setting');
-				}else{
-					console.log('edit :'+post_mac + 'success');
-				}
-				findUnitsAndShowSetting(req,res,false);
-			});
-     		var unitObj = JsonFileTools.getJsonFromFile(unitPath);
-			unitObj[post_mac] = post_name;
-			JsonFileTools.saveJsonToFile(unitPath,unitObj);
+		var	mac = req.query.mac;
+		var	date = req.query.date;
+		var	option = req.query.option;
+		var checkMap = null;
+		var finalList = null;
+		try{
+			finalList = JsonFileTools.getJsonFromFile(path);
+	    } catch(e) {
+	        console.log('Get finalList error : ' + e);
+	        finalList = {};
+	        JsonFileTools.saveJsonToFile(path, finalList);
+	    }
+	    if (finalList === null) {
+	        finalList = {};
 		}
-  	});
+		checkMap = JsonFileTools.getJsonFromFile(path2);
+		let obj = finalList[mac];
+		var keys = Object.keys(obj.information);
+		let type = obj.type;
+		let fieldName = checkMap[type]['fieldName'];
+		let field = [];
+		for(let i=0; i<keys.length;i++) {
+			field.push(fieldName[keys[i]]);
+		}
+        
+
+		res.render('devices', {
+			title: '裝置列表',
+			field: field,
+			mac:mac,
+			date: date,
+			test: test,
+			option
+		});
+  });
 };
