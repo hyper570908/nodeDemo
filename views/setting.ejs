@@ -1,0 +1,81 @@
+<%- include extend/sb_header %>
+
+<div class="row">
+		<div class="col-md-4">
+			<form role="form">
+				<div class="form-group">
+					<label for="exampleInputEmail1">
+						溫度最大值
+					</label>
+					<input type="text" class="form-control" id="tempMax" name="tempMax" maxlength="10"/>
+					
+				</div>
+				<button class="btn btn-primary" onClick="save()">
+					儲存
+				</button>
+			</form>
+		</div>
+	</div>
+
+<script>
+    var connected = false;
+	var host = window.location.hostname;
+	var port = window.location.port;
+	if(location.protocol=="https:"){
+	  var wsUri="wss://"+window.location.hostname+":"+window.location.port+"/ws/setting";
+	} else {
+	  var wsUri="ws://"+window.location.hostname+":"+window.location.port+"/ws/setting";
+	}
+	console.log("wsUri:"+wsUri);
+	var ws=null;
+	wsConn();
+
+	function save(){
+	    var tempMax = document.getElementById("tempMax").value;
+	    console.log('溫度最大值 :' + tempMax);
+      sendWSCMD(tempMax);
+	}
+
+	function sendWSCMD(value) {
+		var obj = {"id":"sendCmd","v":value};
+        var getRequest = JSON.stringify(obj);
+        console.log("ws.onopen : "+ getRequest);
+        ws.send(getRequest);
+	}
+
+	function wsConn() {
+		ws = new WebSocket(wsUri);
+		ws.onmessage = function(m) {
+		    //console.log('< from-node-red:',m.data);
+		    if (typeof(m.data) === "string" && m. data !== null){
+		      var msg =JSON.parse(m.data);
+		      console.log("from-node-red : id:"+msg.id);
+		      if(msg.id === 'toSaveFail') {
+		      	alert('儲存失敗');
+		      } else if(msg.id === 'toSaveOK') {
+		      	alert('儲存完成');
+		      }
+		    }
+		}
+
+		ws.onopen = function() {
+		    connected = true;
+		    var obj = {"id":"init"};
+		    var getRequest = JSON.stringify(obj);
+		    console.log("ws.onopen : "+ getRequest);
+		    ws.send(getRequest);
+		  }
+
+		  ws.onclose   = function()  {
+		    console.log('Node-RED connection closed: '+new Date().toUTCString());
+		    connected = false;
+		    ws = null;
+		  }
+
+		  ws.onerror  = function(){
+		    console.log("connection error");
+		  }
+	}
+
+</script>
+<%- include extend/sb_footer %>

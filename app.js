@@ -19,6 +19,18 @@ var linebot = require('linebot');
 var app = express();
 var JsonFileTools =  require('./models/jsonFileTools.js');
 var userPath = './public/data/user.json';
+var finalPath = './public/data/finalList.json';
+var finalList = JsonFileTools.getJsonFromFile(finalPath);
+var finalEvent = {};
+if(finalList) {
+  var keys = Object.keys(finalList);
+  if (keys.length > 0) {
+    finalEvent = finalList[keys[0]];
+  }
+} else {
+  JsonFileTools.saveJsonToFile(finalPath, {});
+}
+
 
 var bot = linebot({
     channelId: settings.channelId,
@@ -100,9 +112,9 @@ var setting = {
     userDir:"./.nodered/",
     functionGlobalContext: {
       momentModule:require("moment"),
-      deviceDbTools:require("./models/device.js"),
-      msgTools:require("./models/msgTools.js"),
-      util: require('./models/util.js')
+      eventTools:require("./models/event.js"),
+      util: require('./models/util.js'),
+      finalEvent: finalEvent
     }    // enables global context
 };
 

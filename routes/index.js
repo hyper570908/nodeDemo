@@ -1,6 +1,5 @@
 ﻿var express = require('express');
 var router = express.Router();
-var Device = require('../models/device.js');
 var settings = require('../settings');
 var JsonFileTools =  require('../models/jsonFileTools.js');
 var path = './public/data/finalList.json';
@@ -12,7 +11,7 @@ var test = true;
 module.exports = function(app) {
   app.get('/', function (req, res) {
 		var now = new Date().getTime();
-		var device = null,
+		var event = null,
 			finalList = null;
 		try{
 	        finalList = JsonFileTools.getJsonFromFile(path);
@@ -27,11 +26,11 @@ module.exports = function(app) {
 
 		var keys = Object.keys(finalList);
 		if (keys.length > 0) {
-			device = finalList[keys[0]];
+			event = finalList[keys[0]];
 		}
 		res.render('index', {
 			title: '首頁',
-			device: device,
+			event: event,
 			finalList: finalList
 		});
   });
@@ -42,15 +41,9 @@ module.exports = function(app) {
 		});
   });
 
-  app.get('/test', function (req, res) {
-	res.render('test', {
-		title: '設定'
-	});
-});
-
   // Jason add on 2017.11.16
   app.get('/finalList', function (req, res) {
-		var devices = {},
+		var events = {},
 		    selectedType = null,
 			finalList = null;
 		try{
@@ -75,16 +68,16 @@ module.exports = function(app) {
 			if(i==0){
 				selectedType = type;
 			}
-			if(devices[type] === undefined) {
-				devices[type] = [];
+			if(events[type] === undefined) {
+				events[type] = [];
 			}
-			devices[type].push(obj);
+			events[type].push(obj);
 		}
 
 		res.render('finalList', {
 			title: '最新資訊',
-			finalList: devices[selectedType],
-			devices: devices,
+			finalList: events[selectedType],
+			devices: events,
 			maps: maps
 		});
   });
@@ -122,7 +115,7 @@ module.exports = function(app) {
 			mac:mac,
 			date: date,
 			test: test,
-			option
+			option: option
 		});
   });
 };

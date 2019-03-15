@@ -8,6 +8,10 @@ var dbMap = require('./mongoMap.js');
 var JsonFileTools =  require('./jsonFileTools.js');
 var path = './public/data/finalList.json';
 var path2 = './public/data/checkMap.json';
+var path3 = './public/data/setting.json';
+var userPath = './public/data/user.json';
+var settings = require('../settings');
+var linebot = require('linebot');
 
 //Jason modify on 2018.05.06 for switch local and cloud db -- end
 var finalList = {};
@@ -17,21 +21,20 @@ init()
 
 module.exports = {
     init,
-    checkDevice,
+    saveSetting,
+    getSetting,
+    getTabledata,
     parseMsgd,
     createMap,
-    checkFormData,
     isDebug,
     addJSON,
     getCurrentTime,
-    httpGet,
-    encodeBase64,
-    decodeBase64,
     DateTimezone,
     getISODate,
     getMacString,
     getType,
-    getCurrentUTCDate
+    getCurrentUTCDate,
+    sendLineMessage
 }
 
 function init() {
@@ -59,43 +62,30 @@ function init() {
     }
 }
 
-function httpGet(url, username, password) {
-    const tok = username + ':' + password;
-    const hash = encodeBase64(tok);
-    const Basic = 'Basic ' + hash;
-    axios.get(url, {headers : { 'Authorization' : Basic }})
-    .then(response => {
-        console.log(response.data.url);
-        console.log(response.data.explanation);
-        return response.data;
-    })
-    .catch(error => {
-        console.log(error);
-        return error;
-    });
-}
-
 function isDebug () {
     return config.debug;
 }
 
-function encodeBase64 (codeStr) {
-    return Buffer.from(codeStr).toString('base64');
+function saveSetting (max, callback) {
+    var json = {tempMax : Number(max)};
+    try {
+        JsonFileTools.saveJsonToFile(path3, json);
+    }
+    catch (e) {
+        return callback(e.message);
+
+    }
+    return callback(null,'ok');
 }
 
-function decodeBase64 (encodeStr) {
-    return Buffer.from(encodeStr, 'base64').toString('ascii');
-}
-  
-function checkDevice(mac, callback) {
-    var datas = db.getDevices(mac, function(err, devices){
-        if (err) {
-          // console.log('getDevices fail : ' + err);
-          return callback(err);
-        }
-        // console.log('getDevices success : \n' + JSON.stringify(devices));
-        return (null,devices);
-    })
+function getSetting () {
+    try {
+        var setting = JsonFileTools.getJsonFromFile(path3);
+    }
+    catch (e) {
+        var setting = {};
+    }
+    return setting;
 }
 
 function parseMsgd(message) {
@@ -273,35 +263,6 @@ function saveMsgToDB (msg) {
     });
 }
 
-function checkFormData (req, checkArr) {
-    try {
-        var keys = '';
-        var values = '';
-        var keys = Object.keys(req.body);
-        /* if (keys.length < checkArr.length) {
-            return null;
-        } */
-        var count = 0;
-        var json = {};
-        keys.forEach(function(key,index) {
-            // console.log('index : ' + index + ', key : ' + key );
-            if(checkArr.indexOf(key) !== -1) {
-                json[key] = req.body[key];
-                count ++;
-            }
-        });
-        //Not include token key
-        if (count !== (checkArr.length)) {
-            return null;
-        } else {
-            delete json.token;
-            return json;
-        }
-    } catch (error) {
-        return 'Parameter format error';
-    }
-}
-
 function addJSON(obj1, obj2) {
     let keys = Object.keys(obj2);
     for (let i=0;i<keys.length; i++) {
@@ -439,4 +400,54 @@ function isRepeatEvent(checkObj, obj) {
         return false;
     }
     return false;
+}
+
+function sendLineMessage (msg) {
+    var bot = linebot({
+        channelId: settings.channelId,
+        channelSecret: settings.channelSecret,
+        channelAccessToken: settings.channelAccessToken
+    });
+    var user = JsonFileTools.getJsonFromFile(userPath);
+    if (user.friend.length > 0) {
+        bot.multicast(user.friend, msg).then(function (data) {
+            // success 
+            console.log('push line :' + JSON.stringify(data));
+        }).catch(function (error) {
+            // error 
+            console.log('push line error :' + error);
+        });
+    }
+}
+
+function getTabledata (lists) {
+    var rows = 0;
+    var mItem = 1;
+    var array = [];
+    console.log( 'Last Device Information \n '+JSON.stringify( lists[lists.length-1]));
+
+    for (var i=0;i<lists.length;i++)
+    {
+        array.push(getArray(lists[i],mItem));
+        
+        mItem++;
+    }
+    return array;
+}
+
+function getArray (obj,item){
+    var arr = [];
+    if(item<10){
+        arr.push('0'+item);
+    }else{
+        arr.push(item.toString());
+    }
+    
+    arr.push(obj.date);
+    arr.push(obj.data);
+    var keys = Object.keys(obj.information);
+    for (var i = 0;i < keys.length; i++) {
+        arr.push(obj.information[keys[i]]);
+    }
+    return arr ;
 }

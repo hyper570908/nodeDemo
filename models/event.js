@@ -1,12 +1,10 @@
 // grab the things we need
 var mongoose = require('./mongoose.js');
 var Schema = mongoose.Schema;
-var JsonFileTools =  require('./jsonFileTools.js');
-var Tools = require('./tools.js');
 var moment = require('moment');
 
 // create a schema
-var deviceSchema = new Schema({
+var eventSchema = new Schema({
   macAddr : { type: String},
   data: { type: String},
   recv: { type: Date},
@@ -17,14 +15,14 @@ var deviceSchema = new Schema({
 
 // the schema is useless so far
 // we need to create a model using it
-var DeviceModel = mongoose.model('Device', deviceSchema);
+var EventModel = mongoose.model('Event', eventSchema);
 
-function saveDeviceMsg (obj,callback) {
+function saveEventMsg (obj,callback) {
 
-    var now = moment().toDate();
-    console.log(now + ' Debug : saveDeviceMsg');
+    var now = moment().format('YYYY-MM-DD HH:mm:ss');;
+    console.log(now + ' Debug : saveEventMsg');
 
-    var newDevice = new DeviceModel({
+    var newEvent = new EventModel({
         macAddr    : obj.macAddr,
         data       : obj.data,
         recv       : obj.recv,
@@ -33,14 +31,14 @@ function saveDeviceMsg (obj,callback) {
         information: obj.information
     });
 
-    console.log('$$$$ DeviceModel : '+JSON.stringify(newDevice));
+    console.log('$$$$ EventModel : '+JSON.stringify(newEvent));
 
-    newDevice.save(function(err){
+    newEvent.save(function(err){
         if(err){
-            console.log(now + ' Debug : Device save fail!');
+            console.log(now + ' Debug : Event save fail!');
             return callback(err);
         }else{
-            console.log(now + ' Debug : Device save success!');
+            console.log(now + ' Debug : Event save success!');
             return callback(err,"OK");
         }
     });
@@ -49,15 +47,15 @@ function saveDeviceMsg (obj,callback) {
 function findByMac (find_mac,callback) {
     if(find_mac.length>0){
             //console.log('find_mac.length>0');
-            DeviceModel.find({ macAddr: find_mac }, function(err,devices){
+            EventModel.find({ macAddr: find_mac }, function(err,events){
                 if(err){
                     return callback(err);
                 }
                 var now = moment().format('YYYY-MM-DD HH:mm:ss');
 
-                if (devices.length>0) {
-                    console.log(now+' findByMac() : '+devices.length+' records');
-                    return callback(err,devices);
+                if (events.length>0) {
+                    console.log(now+' findByMac() : '+ events.length+' records');
+                    return callback(err,events);
                 }else{
                     console.log('找不到資料!');
                     return callback('找不到資料!');
@@ -71,53 +69,53 @@ function findByMac (find_mac,callback) {
 
 /*Find all of unit
 */
-function findAllDevices (calllback) {
+function findAllEvents (calllback) {
 
-    DeviceModel.find((err, Devices) => {
+    EventModel.find((err, Events) => {
         var now = moment().format('YYYY-MM-DD HH:mm:ss');
         if (err) {
-            console.log(now+'Debug : findAllDevices err:', err);
+            console.log(now+'Debug : findAllEvents err:', err);
             return calllback(err);
         } else {
-            console.log(now+'Debug : findAllDevices success\n:',Devices.length);
-            return calllback(err,Devices);
+            console.log(now+'Debug : findAllEvents success\n:',Events.length);
+            return calllback(err,Events);
         }
     });
 };
 
-function toFindDevices(json,calllback) {
+function toFindEvents(json,calllback) {
 
-    DeviceModel.find(json,(err, Devices) => {
+    EventModel.find(json,(err, Events) => {
         var now = moment().format('YYYY-MM-DD HH:mm:ss');
         if (err) {
-            console.log(now+'Debug : toFindDevices() err:', err);
+            console.log(now+'Debug : toFindEvents() err:', err);
             return calllback(err);
         } else {
-            console.log(now+'Debug :toFindDevices() success\n:',Devices.length);
-            return calllback(err,Devices);
+            console.log(now+'Debug :toFindEvents() success\n:',Events.length);
+            return calllback(err,Events);
         }
     });
 }
 
-function findDevices (json,calllback) {
+function findEvents (json,calllback) {
 
-    DeviceModel.find(json,(err, Devices) => {
+    EventModel.find(json,(err, Events) => {
         var now = moment().format('YYYY-MM-DD HH:mm:ss');
         if (err) {
-            console.log(now+'Debug : findDevice err:', err);
+            console.log(now+'Debug : findEvents err:', err);
             return calllback(err);
         } else {
-            console.log(now+'Debug :findDevice success\n:',Devices.length);
-            return calllback(err,Devices);
+            console.log(now+'Debug :findEvents success\n:',Events.length);
+            return calllback(err,Events);
         }
     });
 };
 
-/*Find devices by date
+/*Find events by date
 *date option: 0:one days 1:one weeks 2:one months 3:three months
 */
-function findDevicesByDate (dateStr,mac,dateOption,order,calllback) {
-    console.log(moment().format('YYYY-MM-DD HH:mm:ss')+' Debug : findDevicesByDate()');
+function findEventsByDate (dateStr,mac,dateOption,order,calllback) {
+    console.log(moment().format('YYYY-MM-DD HH:mm:ss')+' Debug : findEventsByDate()');
     console.log('-mac : '+mac);
     var nowMoment = moment(dateStr, "YYYY-MM-DD hh:mmss");
     var now = nowMoment.toDate();
@@ -149,21 +147,21 @@ function findDevicesByDate (dateStr,mac,dateOption,order,calllback) {
                 }
         }
 
-    DeviceModel.find(json,(err, Devices) => {
+        EventModel.find(json,(err, Events) => {
         if (err) {
-            console.log('Debug : findDevice err:', err);
+            console.log('Debug : findEvents err:', err);
             return calllback(err);
         } else {
-            console.log('Debug :findDevice success\n:',Devices.length);
-            var devices = [];
-            if(order == 'asc' && Devices.length>0){
-               devices = Devices.sort(dynamicSort('-date'));
+            console.log('Debug :findEvents success\n:', Events.length);
+            var events = [];
+            if(order == 'asc' && Events.length>0){
+                events = Events.sort(dynamicSort('-date'));
             } else {
-               devices = Devices.sort(dynamicSort('date'));
+                events = Events.sort(dynamicSort('date'));
             }
-            console.log('After sort : first device \n:',JSON.stringify(devices[0]));
-            console.log('After sort : last device \n:',JSON.stringify(devices[Devices.length-1]));
-            return calllback(err,Devices);
+            console.log('After sort : first events \n:',JSON.stringify(events[0]));
+            console.log('After sort : last events \n:',JSON.stringify(events[events.length-1]));
+            return calllback(err,events);
         }
     });
 };
@@ -190,36 +188,39 @@ function isEmpty(obj) {
 }
 
 module.exports = {
-  saveDeviceMsg,
-  findAllDevices,
-  findDevices,
-  findDevicesByDate,
+  saveEventMsg,
+  findAllEvents,
+  findEvents,
+  findEventsByDate,
+  findLastEvent,
+  findLastEventByMac,
+  findLastEventByMacIndex,
   findByMac
 }
 
 //Find last record by mac
-function findLastDeviceByMac (mac,calllback) {
-    return toFindLastDevice({macAddr:mac},calllback);
+function findLastEventByMac (mac,calllback) {
+    return toFindLastEvent({macAddr:mac},calllback);
 };
 
-function findLastDeviceByMacIndex (mac,_index,calllback) {
-    return toFindLastDevice({macAddr:mac,index:_index},calllback);
+function findLastEventByMacIndex (mac,_index,calllback) {
+    return toFindLastEvent({macAddr:mac,index:_index},calllback);
 };
 
 //Find last record by json
-function findLastDevice (json,calllback) {
-    return toFindLastDevice(json,calllback);
+function findLastEvent (json,calllback) {
+    return toFindLastEvent(json,calllback);
 };
 
-function toFindLastDevice(json,calllback) {
-    DeviceModel.find(json).sort({recv: -1}).limit(1).exec(function(err,devices){
+function toFindLastEvent(json,calllback) {
+    EventModel.find(json).sort({recv: -1}).limit(1).exec(function(err,events){
         var now = moment().format('YYYY-MM-DD HH:mm:ss');
         if(err){
-            console.log(now+'Debug deviceDbTools find Last Device By Unit -> err :'+err);
+            console.log(now+'Debug eventDbTools find Last event By Unit -> err :'+err);
             return calllback(err,null);
         }else{
-            console.log(now+'Debug deviceDbTools find Last Device By Unit('+json+') -> device :'+devices.length);
-            return calllback(err,devices[0]);
+            console.log(now+'Debug eventDbTools find Last event By Unit('+json+') -> event :'+ events.length);
+            return calllback(err,events[0]);
         }
     });
 }

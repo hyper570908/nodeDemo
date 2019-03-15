@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 //var UnitDbTools = require('../models/unitDbTools.js');
-var Device = require('../models/device.js');
+var EventTools = require('../models/event.js');
 var user = require('../models/user.js');
 var moment = require('moment');
 
@@ -11,7 +11,7 @@ router.route('/devices')
 		var mac    = req.query.mac;
 		var option = req.query.option;
 		var date  = req.query.date;
-		Device.findDevicesByDate(date,mac,Number(option),'asc',function(err,devices){
+		EventTools.findEventsByDate(date,mac,Number(option),'asc',function(err,devices){
 		    if (err)
 				return res.send(err);
 			return res.json(devices);
@@ -23,7 +23,7 @@ router.route('/devices/:mac')
 
 	// get the bear with that id
 	.get(function(req, res) {
-		Device.findByMac(req.params.mac, function(err, devices) {
+		EventTools.findByMac(req.params.mac, function(err, devices) {
 			if (err)
 				return res.send(err);
 			return res.json(devices);
@@ -84,7 +84,7 @@ router.route('/setting')
 
 	// get the bear with that id
 	.get(function(req, res) {
-		Device.findByMac(req.params.mac, function(err, devices) {
+		EventTools.findByMac(req.params.mac, function(err, devices) {
 			if (err)
 				return res.send(err);
 			return res.json(devices);

@@ -118,6 +118,7 @@ function wsConn() {
                     });
                 }
                 waitingDialog.hide();
+                ws.close();
             }
         }
     }
@@ -125,10 +126,13 @@ function wsConn() {
 
         var mac = document.getElementById("mac").value;
         var date  = document.getElementById("date").value;
-        var option  = document.getElementById("option").valu
+        var option  = document.getElementById("option").value;
+        console.log('ws.onopen --------------------');
+        console.log('mac :'+ mac);
         console.log('date :'+ date);
+        console.log('option :'+ option);
         connected = true;
-        var obj = {"id":"init", "v": {mac: mac, date: date, option: option}};
+        var obj = {"id":"init", "v": {mac: mac, date: date, option: Number(option)}};
         var getRequest = JSON.stringify(obj);
         console.log("getRequest type : "+ typeof(getRequest)+" : "+getRequest);
         console.log("ws.onopen : "+ getRequest);

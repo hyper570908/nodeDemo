@@ -1,6 +1,6 @@
 ﻿
 <%- include extend/sb_header %>
-
+    <meta http-equiv="refresh" content="6000">
 	<!--這是首頁-->
     <div class="row">
         <div class="col-lg-3 col-md-6">
@@ -13,8 +13,8 @@
                         <div class="col-xs-9 text-right">
                             <div class="huge">識別碼</div>
                             <div>
-                                <% if (device && device.macAddr) { %>
-                                    <%= device.macAddr %>
+                                <% if (event && event.macAddr) { %>
+                                    <%= event.macAddr %>
                                 <% } %>
                             </div>
                         </div>
@@ -39,8 +39,8 @@
                         <div class="col-xs-9 text-right">
                             <div class="huge">溫度</div>
                             <div>
-                                <% if (device && device.information.temperature) { %>
-                                    <%= device.information.temperature %>℃
+                                <% if (event && event.information.temperature) { %>
+                                    <%= event.information.temperature %>℃
                                 <% } %>
                             </div>
                         </div>
@@ -65,8 +65,8 @@
                         <div class="col-xs-9 text-right">
                             <div class="huge">濕度</div>
                             <div>
-                                <% if (device && device.information.humidity) { %>
-                                    <%= device.information.humidity %>%
+                                <% if (event && event.information.humidity) { %>
+                                    <%= event.information.humidity %>%
                                 <% } %>
                             </div>
                         </div>
@@ -91,8 +91,8 @@
                         <div class="col-xs-9 text-right">
                             <div class="huge">時間</div>
                             <div>
-                                <% if (device && device.date) { %>
-                                    <%= device.date%>
+                                <% if (event && event.date) { %>
+                                    <%= event.date%>
                                 <% } %>
                             </div>
                         </div>
