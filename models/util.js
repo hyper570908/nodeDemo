@@ -73,7 +73,6 @@ function saveSetting (max, callback) {
     }
     catch (e) {
         return callback(e.message);
-
     }
     return callback(null,'ok');
 }
@@ -84,6 +83,7 @@ function getSetting () {
     }
     catch (e) {
         var setting = {};
+        JsonFileTools.saveJsonToFile(path3, json);
     }
     return setting;
 }

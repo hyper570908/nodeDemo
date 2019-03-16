@@ -20,7 +20,14 @@ var app = express();
 var JsonFileTools =  require('./models/jsonFileTools.js');
 var userPath = './public/data/user.json';
 var finalPath = './public/data/finalList.json';
-var finalList = JsonFileTools.getJsonFromFile(finalPath);
+var finalList = {};
+try {
+  finalList = JsonFileTools.getJsonFromFile(finalPath);
+}
+catch (e) {
+  finalList = {};
+  JsonFileTools.saveJsonToFile(finalPath, finalList);
+}
 var finalEvent = {};
 if(finalList) {
   var keys = Object.keys(finalList);

@@ -56,9 +56,15 @@ module.exports = function(app) {
 	    if (finalList === null) {
 	        finalList = {};
 		}
-		var checkMap = JsonFileTools.getJsonFromFile(path2);
+		var checkMap = {};
+		try {
+			checkMap = JsonFileTools.getJsonFromFile(path2);
+		}
+		catch (e) {
+			checkMap = {};
+			JsonFileTools.saveJsonToFile(finalPath, checkMap);
+		}
 		var maps = Object.values(checkMap);
-
 		var keys2 = Object.keys(finalList);
 		for(let i=0;i < keys2.length; i++) {
 			let mac = keys2[i];
