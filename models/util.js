@@ -103,10 +103,40 @@ function parseMsgd(message) {
         } else if (getType(mesObj) === 'object') {
             obj = message;
         }
-        var fport = obj.fport.toString();
-        //Get data attributes
         var mData = obj.data;
         var mMac  = obj.macAddr;
+        var fport = '1';
+        var utcMoment = null;
+        var mRecv = '';
+        var mExtra = {'gwip': obj.gwip,
+                  'gwid': obj.gwid,
+                  'rssi': obj.rssi,
+                  'snr' : obj.snr,
+                  'fport': obj.fport+'',
+                  'frameCnt': obj.frameCnt,
+                  'channel': obj.channel};
+        if(obj.fport) {
+            fport = obj.fport.toString();
+            utcMoment = moment.utc(obj.time);
+            mRecv = obj.time;
+            mExtra = {'gwip': obj.gwip,
+                  'gwid': obj.gwid,
+                  'rssi': obj.rssi,
+                  'snr' : obj.snr,
+                  'fport': obj.fport+''};
+        } else {
+            utcMoment = moment.utc(obj.recv);
+            mRecv = obj.recv;
+            mExtra = obj.extra;
+            mExtra.fport = parseInt(mData.substring(0,2),16) + '';
+        }
+        var timestamp = utcMoment.valueOf();
+        var tMoment = (moment.unix(timestamp/1000)).tz(config.timezone);
+        var mDate = tMoment.format('YYYY-MM-DD HH:mm:ss');
+        
+        //Get data attributes
+        
+        
         if(debug != true) {
             if (checkEvent[mMac] === undefined) {
                 checkEvent[mMac] = obj;
@@ -116,24 +146,10 @@ function parseMsgd(message) {
                 return null;
             }
         }
-       
-        var utcMoment = moment.utc(obj.time);
-        var timestamp = utcMoment.valueOf();
-        var tMoment = (moment.unix(timestamp/1000)).tz(config.timezone);
-        var mDate = tMoment.format('YYYY-MM-DD HH:mm:ss');
-        // var mRecv = obj.time;
-        // var mRecv = new Date( utcMoment.format("YYYY-MM-DDTHH:mm:ss") );
-        var mRecv = obj.time;
     
-        console.log('mRecv : '+  mRecv);
-        console.log('mDate : '+ mDate);
-        var mExtra = {'gwip': obj.gwip,
-                  'gwid': obj.gwid,
-                  'rssi': obj.rssi,
-                  'snr' : obj.snr,
-                  'fport': obj.fport+'',
-                  'frameCnt': obj.frameCnt,
-                  'channel': obj.channel};
+        // console.log('mRecv : '+  mRecv);
+        // console.log('mDate : '+ mDate);
+        
     } catch (error) {
         return callback(error.message);
     }

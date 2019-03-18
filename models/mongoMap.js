@@ -61,8 +61,25 @@ function create (obj) {
                 reject(err);
             }else{
                 if (docs && docs.length > 0) {
-                    reject('Has same map');
-                    return;
+                    MapModel.update({deviceType: obj.deviceType},
+                        {
+                            fieldName: obj.fieldName,
+                            map: obj.map,
+                        },
+                        {safe : true, upsert : true},
+                        (err, rawResponse)=>{
+                            if (err) {
+                                if (debug) {
+                                    console.log(new Date() + 'update map err : ' + err.message);
+                                }
+                                reject(err);
+                            } else {
+                                if (debug) {
+                                    console.log(new Date() + 'update map : ' + rawResponse);
+                                }
+                                resolve('Update map success');
+                            }
+                    });
                 }
                 newMap.save(function(err, docs){
                     if(!err){
