@@ -1,5 +1,5 @@
 module.exports = {
-  debug: true,
+  debug: false,
   cookieSecret: 'mydemo',
   db: 'demo',
   host: 'localhost',

@@ -140,10 +140,12 @@ function parseMsgd(message) {
         if(debug != true) {
             if (checkEvent[mMac] === undefined) {
                 checkEvent[mMac] = obj;
-            } else if (isRepeatEvent(checkEvent[mMac], obj)) {
+            } else  if (isRepeatEvent(checkEvent[mMac], obj)) {
                 // It's repeat event 
                 console.log('Repeat event drop!!!');
                 return null;
+            } else {
+                checkEvent[mMac] = obj;
             }
         }
     
@@ -402,18 +404,17 @@ function getMyDate (dateStr) {
  }
 
 function isRepeatEvent(checkObj, obj) {
-    if (checkObj.frameCnt === obj.frameCnt) {
-        var timestamp1 = moment.utc(checkObj.time).valueOf();
-        var timestamp2 = moment.utc(obj.time).valueOf();
-        var time = Math.abs(timestamp1 - timestamp2)/(60*1000);
-        var checkTime = 10;
-        if (time < checkTime) {
+    if (checkObj.frameCnt && checkObj.frameCnt === obj.frameCnt) {
+        return true;
+    } else {
+        var timestamp1 = moment.utc(checkObj.recv).valueOf();
+        var timestamp2 = moment.utc(obj.recv).valueOf();
+
+        if (timestamp1 == timestamp2) {
             return true;
         } else {
             return false;
         }
-    } else {
-        return false;
     }
     return false;
 }
