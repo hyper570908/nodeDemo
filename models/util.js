@@ -157,42 +157,47 @@ function parseMsgd(message) {
     }
 
     //Parse data
-    if(mExtra.fport){
-        var mType = mExtra.fport.toString();
-        let map = checkMap[mType];
-        if(map) {
-            var mInfo = getTypeData(mData, map);
-            if (debug) {
-                console.log(getCurrentTime() + ' parsers : ' + JSON.stringify(mInfo));
-            }
+    var mType = "";
+    if(mExtra.fport > 1){
+        mType = mExtra.fport.toString();
+    } else if(mExtra.fport == 1){
+        var str =  mData.substring(0,2);
+        var data = parseInt(str,16);
+        mType = data.toString();
+    } else {
+        console.log(new Date() + 'parseMsgd fport is not exist');
+        return null;
+    }
+    let map = checkMap[mType];
+    if(map) {
+        var mInfo = getTypeData(mData, map);
+        if (debug) {
+            console.log(getCurrentTime() + ' parsers : ' + JSON.stringify(mInfo));
+        }
+        
+        if(mInfo){
+            var msg = {macAddr: mMac, data: mData, timestamp: timestamp, recv: mRecv, date: mDate, type: mExtra.fport, typeName: map.typeName};
+            console.log('**** '+msg.date +' mac:'+msg.macAddr+' => data:'+msg.data+'\ninfo:'+JSON.stringify(mInfo));
+            msg.information=mInfo;
             
-            if(mInfo){
-                var msg = {macAddr: mMac, data: mData, timestamp: timestamp, recv: mRecv, date: mDate, type: mExtra.fport, typeName: map.typeName};
-                console.log('**** '+msg.date +' mac:'+msg.macAddr+' => data:'+msg.data+'\ninfo:'+JSON.stringify(mInfo));
-                msg.information=mInfo;
-                
-                if (debug) {
-                    console.log(getCurrentTime() + ' parseMsgd message : ' + JSON.stringify(msg));
-                }
-                // sendLineMessage(mDate + ' newmessage');
-                /*if (doc.profile) {
-                    toCheckNotify(mInfo, doc.profile, mMac);
-                }*/
-                finalList[mMac]=msg;
-                saveFinalListToFile ();
-                return msg;
-            } else {
-                if (debug) {
-                    console.log(new Date() + 'parseMsgd info is not exist');
-                }
-                return null;
+            if (debug) {
+                console.log(getCurrentTime() + ' parseMsgd message : ' + JSON.stringify(msg));
             }
+            // sendLineMessage(mDate + ' newmessage');
+            /*if (doc.profile) {
+                toCheckNotify(mInfo, doc.profile, mMac);
+            }*/
+            finalList[mMac]=msg;
+            saveFinalListToFile ();
+            return msg;
         } else {
-            console.log(new Date() + 'No map for type '+ mType);
+            if (debug) {
+                console.log(new Date() + 'parseMsgd info is not exist');
+            }
             return null;
         }
     } else {
-        console.log(new Date() + 'parseMsgd fport is not exist');
+        console.log(new Date() + 'No map for type '+ mType);
         return null;
     }
 }
