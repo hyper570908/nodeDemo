@@ -108,12 +108,14 @@ module.exports = function(app) {
 		let obj = finalList[mac];
 		var keys = Object.keys(obj.information);
 		let type = obj.type;
-		let fieldName = checkMap[type]['fieldName'];
 		let field = [];
-		for(let i=0; i<keys.length;i++) {
-			field.push(fieldName[keys[i]]);
+		if(checkMap[type]) {
+			let fieldName = checkMap[type]['fieldName'];
+			
+			for(let i=0; i<keys.length;i++) {
+				field.push(fieldName[keys[i]]);
+			}
 		}
-        
 
 		res.render('devices', {
 			title: '裝置列表',

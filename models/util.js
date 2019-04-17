@@ -176,7 +176,7 @@ function parseMsgd(message) {
         }
         
         if(mInfo){
-            var msg = {macAddr: mMac, data: mData, timestamp: timestamp, recv: mRecv, date: mDate, type: mExtra.fport, typeName: map.typeName};
+            var msg = {macAddr: mMac, data: mData, timestamp: timestamp, recv: mRecv, date: mDate, type: mType, typeName: map.typeName};
             console.log('**** '+msg.date +' mac:'+msg.macAddr+' => data:'+msg.data+'\ninfo:'+JSON.stringify(mInfo));
             msg.information=mInfo;
             
