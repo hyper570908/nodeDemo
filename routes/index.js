@@ -79,10 +79,13 @@ module.exports = function(app) {
 			}
 			events[type].push(obj);
 		}
+		let list = null
+		if(selectedType)
+			list = events[selectedType];
 
 		res.render('finalList', {
-			title: '最新資訊',
-			finalList: events[selectedType],
+			title: '歷史資訊',
+			finalList: list,
 			devices: events,
 			maps: maps
 		});

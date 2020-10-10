@@ -105,6 +105,9 @@ function parseMsgd(message) {
         }
         var mData = obj.data;
         var mMac  = obj.macAddr;
+        if(mMac.length===16) {
+            mMac = mMac.substring(8,16);
+        }
         var fport = '1';
         var utcMoment = null;
         var mRecv = '';
@@ -137,7 +140,7 @@ function parseMsgd(message) {
         //Get data attributes
         
         
-        if(debug != true) {
+        /*if(debug != true) {
             if (checkEvent[mMac] === undefined) {
                 checkEvent[mMac] = obj;
             } else  if (isRepeatEvent(checkEvent[mMac], obj)) {
@@ -147,7 +150,7 @@ function parseMsgd(message) {
             } else {
                 checkEvent[mMac] = obj;
             }
-        }
+        }*/
     
         // console.log('mRecv : '+  mRecv);
         // console.log('mDate : '+ mDate);
@@ -158,16 +161,16 @@ function parseMsgd(message) {
 
     //Parse data
     var mType = "";
-    if(mExtra.fport > 1){
+    /*if(mExtra.fport > 1){
         mType = mExtra.fport.toString();
-    } else if(mExtra.fport == 1){
+    } else if(mExtra.fport == 1){*/
         var str =  mData.substring(0,2);
         var data = parseInt(str,16);
         mType = data.toString();
-    } else {
+    /*} else {
         console.log(new Date() + 'parseMsgd fport is not exist');
         return null;
-    }
+    }*/
     let map = checkMap[mType];
     if(map) {
         var mInfo = getTypeData(mData, map);

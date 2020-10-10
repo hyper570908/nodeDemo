@@ -33,35 +33,35 @@
 
 		<div class="col-md-12">
 			<table id="table1"  class="display" cellspacing="0" width="100%">
-		<thead>
-			<tr style="color:#428bca">
-			<th>項目</th>
-			<th>裝置識別編號</th>
-			<th>日期</th>
-			<th>裝置類型</th>
-			<th>狀態</th>
-			</tr>
-		</thead>
-		<tbody>
-			<% for(var i=0;i<finalList.length ;i++){ %>
-				<tr>
-					<td><%= i+1%></td>
-					<td><%= finalList[i].macAddr%></td>
-					<td><%= finalList[i].date%></td>
-					<td><%= finalList[i].typeName%></td>
-					<td>
-					<% if(finalList[i].overtimr){ %>
-						<img src="/icons/connection_fail.png" width="ˇ30" height="30" name="status">
-					<% }else{ %>
-						<img src="/icons/connection_ok.png" width="30" height="30" name="status">
+				<thead>
+					<tr style="color:#428bca">
+					<th>項目</th>
+					<th>裝置識別編號</th>
+					<th>日期</th>
+					<th>裝置類型</th>
+					<th>狀態</th>
+					</tr>
+				</thead>
+				<tbody>
+					<% for(var i=0;i<finalList.length ;i++){ %>
+						<tr>
+							<td><%= i+1%></td>
+							<td><%= finalList[i].macAddr%></td>
+							<td><%= finalList[i].date%></td>
+							<td><%= finalList[i].typeName%></td>
+							<td>
+							<% if(finalList[i].overtimr){ %>
+								<img src="/icons/connection_fail.png" width="ˇ30" height="30" name="status">
+							<% }else{ %>
+								<img src="/icons/connection_ok.png" width="30" height="30" name="status">
+							<% } %>
+							</td>
+						</tr>
 					<% } %>
-					</td>
-				</tr>
-			<% } %>
-		</tbody>
-	</table>
-	<input id="devices" name="devices" value="<%= JSON.stringify(devices)%>" type="hidden">
-	<input id="maps" name="maps" value="<%= JSON.stringify(devices)%>" type="hidden">
+				</tbody>
+			</table>
+			<input id="devices" name="devices" value="<%= JSON.stringify(devices)%>" type="hidden">
+			<input id="maps" name="maps" value="<%= JSON.stringify(devices)%>" type="hidden">
 		</div>
 
 		
