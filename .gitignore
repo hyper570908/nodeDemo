@@ -45,3 +45,7 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+node_modules
+.nodered
+public/data/finalList.json
+public/data/checkMap.json
