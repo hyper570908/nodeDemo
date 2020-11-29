@@ -66,8 +66,14 @@ function isDebug () {
     return config.debug;
 }
 
-function saveSetting (max, callback) {
-    var json = {tempMax : Number(max)};
+function saveSetting (json, callback) {
+    var setting = JsonFileTools.getJsonFromFile(path3);
+    if(setting === undefined || setting === null) {
+        setting = {};
+    }
+    var keys = Object.keys(json);
+    keys.forEach(element => setting[element]= json[element] );
+    //var obj = {tempMax : Number(max)};
     try {
         JsonFileTools.saveJsonToFile(path3, json);
     }

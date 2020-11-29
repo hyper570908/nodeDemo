@@ -20,6 +20,7 @@ var app = express();
 var JsonFileTools =  require('./models/jsonFileTools.js');
 var userPath = './public/data/user.json';
 var finalPath = './public/data/finalList.json';
+var myPath = './public/data/setting.json';
 var finalList = {};
 try {
   finalList = JsonFileTools.getJsonFromFile(finalPath);
@@ -50,7 +51,23 @@ const linebotParser = bot.parser();
 bot.on('message', function(event) {
     // 把收到訊息的 event 印出來
     console.log(event);
-    var msg = new Date() + event.message.text;
+    let myset = JsonFileTools.getJsonFromFile(myPath);
+    let str = '';
+    event.message.text = event.message.text.toLowerCase();
+    if(event.message.text === 'open') {
+      myset.light = 1;
+      str = '現在開燈';
+      JsonFileTools.saveJsonToFile(myPath, myset);
+    } else if(event.message.text === 'close') {
+      myset.light = 0;
+      str = '現在關燈';
+      JsonFileTools.saveJsonToFile(myPath, myset);
+    } else {
+      str = event.message.text;
+      
+    }
+
+    var msg = new Date() + '\r\n Hello ' + str ;
     event.reply(msg).then(function (data) {
         // success 
         console.log('event reply : ' + JSON.stringify(data));
